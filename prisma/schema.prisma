@@ -22,11 +22,18 @@ model WeatherData {
   temperature Float
   humidity    Float
   windSpeed   Float
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
   @@index([cityId, timestamp])
+  @@index([userId, timestamp])
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  createdAt DateTime @default(now())
+  id        String        @id @default(cuid())
+  email     String        @unique
+  createdAt DateTime      @default(now())
+
+  weather   WeatherData[]
 }

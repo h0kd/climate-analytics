@@ -1,36 +1,48 @@
-// src/app/api/weather/current/route.ts
 export const runtime = "nodejs";
+
+import { getAuth } from "@clerk/nextjs/server";
 import prisma from "@/lib/prisma";
 import { fetchCurrentWeather } from "@/lib/weather";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const city = req.nextUrl.searchParams.get("city");
-  if (!city)
+  // 1) Autenticación
+  const { userId } = getAuth(req);
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // 2) Parámetro ciudad
+  const cityName = req.nextUrl.searchParams.get("city");
+  if (!cityName) {
     return NextResponse.json({ error: "Missing ?city=" }, { status: 400 });
+  }
 
   try {
-    const w = await fetchCurrentWeather(city);
+    // 3) Fetch externo
+    const weather = await fetchCurrentWeather(cityName);
 
-    // 1) Busca el id de la ciudad en tu tabla City
-    const cityRecord = await prisma.city.findUnique({ where: { name: city } });
+    // 4) Guarda en BD con userId
+    const cityRecord = await prisma.city.findUnique({
+      where: { name: cityName },
+    });
     if (cityRecord) {
-      // 2) Inserta el histórico
       await prisma.weatherData.create({
         data: {
           cityId: cityRecord.id,
-          timestamp: new Date(w.timestamp),
-          temperature: w.temperature,
-          humidity: w.humidity,
-          windSpeed: w.windSpeed,
+          userId: userId,
+          timestamp: new Date(weather.timestamp),
+          temperature: weather.temperature,
+          humidity: weather.humidity,
+          windSpeed: weather.windSpeed,
         },
       });
     }
 
-    return NextResponse.json(w);
+    return NextResponse.json(weather);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

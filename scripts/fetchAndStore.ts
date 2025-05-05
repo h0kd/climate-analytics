@@ -11,6 +11,7 @@ cron.schedule("0,30 * * * *", async () => {
       await prisma.weatherData.create({
         data: {
           cityId: city.id,
+          userId: "system-user", // ← obligatorio ahora
           timestamp: new Date(w.timestamp),
           temperature: w.temperature,
           humidity: w.humidity,
