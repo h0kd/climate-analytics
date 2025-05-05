@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model City {
+  id      Int           @id @default(autoincrement())
+  name    String        @unique
+  country String
+  weather WeatherData[]
+}
+
+model WeatherData {
+  id          Int      @id @default(autoincrement())
+  city        City     @relation(fields: [cityId], references: [id])
+  cityId      Int
+  timestamp   DateTime
+  temperature Float
+  humidity    Float
+  windSpeed   Float
+  @@index([cityId, timestamp])
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}

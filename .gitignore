@@ -39,3 +39,22 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+dev.db
+/prisma/migrations
+src/generated/prisma/
+
+# IDEs & editors
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+
+# Logs de la app
+logs/
+*.log
+
+# Si generas snapshots o caches
+jest-snapshot-*.json
+.cache/
