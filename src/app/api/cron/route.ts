@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/weather/fetch-and-store`,
     {
-      headers: {},
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${process.env.CRON_SECRET}`,
+      },
     }
   );
 
