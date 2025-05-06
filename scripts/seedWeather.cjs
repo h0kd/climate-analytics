@@ -7,14 +7,23 @@ async function main() {
   const city = await prisma.city.findUnique({ where: { name: "Santiago" } });
   if (!city) throw new Error("Ciudad no encontrada");
 
+  // Asegúrate de que existe el usuario system-user
+  await prisma.user.upsert({
+    where: { id: "system-user" },
+    update: {},
+    create: { id: "system-user", email: "system@localhost" },
+  });
+
   const now = new Date();
-  // Borra datos previos en el rango para evitar duplicados
   const fromDate = new Date(now);
   fromDate.setDate(now.getDate() - 7);
+
+  // Borra datos previos en el rango
   await prisma.weatherData.deleteMany({
     where: {
       cityId: city.id,
       timestamp: { gte: fromDate },
+      userId: "system-user",
     },
   });
 
@@ -29,10 +38,13 @@ async function main() {
 
     await prisma.weatherData.create({
       data: {
-        cityId: city.id,
+        // Conecta la ciudad por su ID
+        city: { connect: { id: city.id } },
+        // Conecta el usuario “system-user”
+        user: { connect: { id: "system-user" } },
         timestamp: date,
         temperature: temp,
-        humidity,
+        humidity: humidity,
         windSpeed: wind,
       },
     });
