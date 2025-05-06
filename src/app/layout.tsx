@@ -7,6 +7,7 @@ import {
   SignedOut,
   RedirectToSignIn,
 } from "@clerk/nextjs";
+import Header from "@/components/Header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
         <ClerkProvider>
+          <Header />
           <SignedIn>{children}</SignedIn>
           <SignedOut>
             <RedirectToSignIn />
